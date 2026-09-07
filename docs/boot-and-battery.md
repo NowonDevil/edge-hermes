@@ -72,3 +72,36 @@ cat /sdcard/hermes-boot-schedule.log
 - Magisk
 
 가능하면 백그라운드 실행, 자동 시작, 데이터 절약 모드 제한도 해제한다.
+
+## 안전 업데이트 절차
+
+엣지헤르메스 업데이트는 **Termux에서** 실행한다. Hermes 본체는 Debian/proot 안에 있으므로 `hermes_update.sh`가 내부에서 `proot-distro login debian -- ...`로 진입해 처리한다.
+
+실행 파일 위치:
+
+```text
+/data/data/com.termux/files/home/hermes_update.sh
+/data/data/com.termux/files/home/start-hermes-gateway.sh
+```
+
+기본 사용:
+
+```bash
+~/hermes_update.sh
+```
+
+처리 순서:
+
+1. `hermes-gateway` tmux 세션과 gateway 프로세스 종료
+2. Debian/proot 내부에서 `HOME=/root`, `HERMES_HOME=/root/.hermes` 고정
+3. `/root/hermes-agent/venv/bin/python -m hermes_cli.main --profile discordlite update` 실행
+4. `doctor` 실행
+5. `~/start-hermes-gateway.sh`로 gateway 재시작
+
+수동 gateway 재시작만 필요하면 Termux에서 다음을 실행한다.
+
+```bash
+~/start-hermes-gateway.sh
+```
+
+주의: gateway 실행 중 직접 `hermes update`를 수행하면 venv 바이너리 패키지나 git 작업트리가 중간 상태로 남을 수 있으므로, 업데이트 전 gateway를 먼저 종료한다.
