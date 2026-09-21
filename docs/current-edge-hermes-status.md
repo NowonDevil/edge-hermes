@@ -1,11 +1,11 @@
 # 현재 엣지헤르메스 상태
 
-- 기록 시각: 2026-08-13T15:28:09+09:00
+- 기록 시각: 2026-09-21T09:28:32+09:00
 - 장비 모델: SM-G935K
 - Android: 8.0.0 / SDK 26
 - proot/Linux: Linux localhost 6.17.0-PRoot-Distro #1 SMP PREEMPT_DYNAMIC Fri, 10 Oct 2025 00:00:00 +0000 aarch64 GNU/Linux
 - Python: Python 3.13.5
-- Hermes: Hermes Agent v0.19.1 (2026.7.30)
+- Hermes: Hermes Agent v0.21.3 계열
 Install directory: /root/hermes-agent
 Python: 3.13.5
 OpenAI SDK: 2.24.0
@@ -34,3 +34,18 @@ Run 'hermes version' for update status.
 - Android `settings`/`cmd` Binder 호출은 Magisk root에서도 실패할 수 있음.
 - Hermes gateway lifecycle 명령은 실행 중인 gateway 내부에서 직접 호출하면 guard에 막힐 수 있음.
 - 토큰, OAuth 파일, SSH 키는 저장소에 포함하지 않음.
+
+
+## 2026-09-21 재부팅 복구 검증
+
+- 강제 재부팅 후 약 12분 상태에서 gateway 실행 확인.
+- `hermes gateway status`: PID `12376`, running.
+- watchdog 프로세스: `/data/data/com.termux/files/home/.termux/boot/04-hermes.sh`.
+- tmux 세션: `hermes-gateway`.
+- Discord 연결:
+  - `2026-09-21 09:17:49 Connected as 엣지헤르메스#3379`
+  - `2026-09-21 09:18:00 Gateway running with 1 platform(s)`
+- boot watchdog 로그:
+  - `Mon Sep 21 09:16:55 KST 2026 boot watchdog requested`
+  - `Mon Sep 21 09:17:56 KST 2026 ok: tmux session hermes-gateway exists`
+- Autostart/Termux:Boot 조합으로 부팅 후 자동복구 성공으로 판단.

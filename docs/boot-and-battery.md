@@ -20,7 +20,7 @@
 tailscale ping <phone-name-or-tailscale-ip>
 ```
 
-## Termux:Boot 설정
+## Termux:Boot / Autostart 설정
 
 부트 스크립트 위치:
 
@@ -28,39 +28,62 @@ tailscale ping <phone-name-or-tailscale-ip>
 /data/data/com.termux/files/home/.termux/boot/04-hermes.sh
 ```
 
-현재 방식: 부팅 후 60초 대기, wake-lock 획득, `$HOME/start-hermes-gateway.sh` 실행, `/sdcard/hermes-boot-schedule.log` 기록.
+저장소 원본:
 
-예시:
-
-```bash
-#!/data/data/com.termux/files/usr/bin/bash
-LOG="/sdcard/hermes-boot-schedule.log"
-RUNNER="$HOME/start-hermes-gateway.sh"
-(
-  echo "===== $(date) boot autostart started ====="
-  /data/data/com.termux/files/usr/bin/termux-wake-lock 2>/dev/null || true
-  sleep 60
-  echo "$(date) launching Hermes on boot"
-  if [ -x "$RUNNER" ]; then
-    "$RUNNER"
-    RC=$?
-  else
-    echo "Launcher missing or not executable: $RUNNER"
-    RC=127
-  fi
-  echo "$(date) launcher finished rc=$RC"
-  /data/data/com.termux/files/usr/bin/termux-wake-unlock 2>/dev/null || true
-  exit "$RC"
-) >> "$LOG" 2>&1 &
+```text
+scripts/04-hermes.sh
+scripts/start-hermes-gateway.sh
+scripts/termux-bashrc-hermes-autostart.sh
 ```
 
-검증:
+현재 방식:
+
+1. Android 부팅 후 Autostart 앱 또는 Termux:Boot가 Termux를 백그라운드로 깨운다.
+2. `04-hermes.sh`가 `termux-wake-lock`을 먼저 잡는다.
+3. watchdog lock 디렉터리에 pidfile을 기록한다.
+4. lock은 있는데 pid가 없거나 죽어 있으면 stale lock으로 보고 정리한다.
+5. 60초 대기 후 `hermes-gateway` tmux 세션/gateway 프로세스를 확인한다.
+6. 없으면 `$HOME/start-hermes-gateway.sh`로 Debian/proot의 Discord gateway를 실행한다.
+7. 이후 5분마다 tmux/gateway 상태를 확인한다.
+
+검증 로그:
+
+```text
+/sdcard/hermes-boot-schedule.log
+/sdcard/hermes-termux-open-autostart.log
+```
+
+재부팅 성공 기준:
+
+```text
+boot watchdog requested
+missing: starting Hermes gateway launcher
+Connected as 엣지헤르메스#3379
+Gateway running with 1 platform(s)
+ok: tmux session hermes-gateway exists
+```
+
+실측 예시:
+
+```text
+Mon Sep 21 09:16:55 KST 2026 boot watchdog requested
+Mon Sep 21 09:17:56 KST 2026 ok: tmux session hermes-gateway exists
+2026-09-21 09:17:49 Connected as 엣지헤르메스#3379
+2026-09-21 09:18:00 Gateway running with 1 platform(s)
+```
+
+수동 검증:
 
 ```bash
 chmod 755 /data/data/com.termux/files/home/.termux/boot/04-hermes.sh
 bash -n /data/data/com.termux/files/home/.termux/boot/04-hermes.sh
-cat /sdcard/hermes-boot-schedule.log
+bash -n /data/data/com.termux/files/home/start-hermes-gateway.sh
+tail -80 /sdcard/hermes-boot-schedule.log
 ```
+
+Termux 앱을 수동으로 열었을 때도 자동 복구되도록 `.bashrc`에 `scripts/termux-bashrc-hermes-autostart.sh` 내용을 추가한다. 이 fallback은 Termux 앱 자체를 깨우지는 못하지만, 사용자가 Termux를 열면 `sshd`와 Hermes gateway를 자동 확인/시작한다.
+
+주의: `.termux/boot` 아래 executable 백업 파일은 Termux:Boot가 함께 실행할 수 있다. 이전 백업은 `disabled-backups/`로 옮기고 실행 권한을 제거한다.
 
 ## 배터리 최적화 제외
 

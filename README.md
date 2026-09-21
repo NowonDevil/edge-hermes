@@ -4,12 +4,12 @@
 
 ## 현재 상태 요약
 
-- 기록 시각: 2026-08-13T15:28:09+09:00
+- 기록 시각: 2026-09-21T09:28:32+09:00
 - 장비 모델: SM-G935K
 - Android: 8.0.0 / SDK 26
 - Linux/proot: Linux localhost 6.17.0-PRoot-Distro #1 SMP PREEMPT_DYNAMIC Fri, 10 Oct 2025 00:00:00 +0000 aarch64 GNU/Linux
 - Python: Python 3.13.5
-- Hermes: Hermes Agent v0.19.1 (2026.7.30)
+- Hermes: Hermes Agent v0.21.3 계열
 Install directory: /root/hermes-agent
 Python: 3.13.5
 OpenAI SDK: 2.24.0
@@ -71,4 +71,6 @@ cat /sdcard/hermes-boot-schedule.log
 
 ## 변경 이력
 
+
+- 2026-09-21: 주간 재부팅 후 게이트웨이 미기동 문제를 진단하고, Termux:Boot watchdog에 stale lock 정리와 pidfile 기반 중복 실행 방지를 추가했다. Autostart 앱/Termux:Boot 조합으로 재부팅 후 약 2분 내 Discord gateway 자동 연결을 확인했다.
 - 2026-09-07: 엣지헤르메스 업데이트 중 gateway/venv/import 경로가 꼬이지 않도록 Termux 실행용 `hermes_update.sh`를 추가하고 `start-hermes-gateway.sh`에 `HOME`, `HERMES_HOME`, venv Python 실행 경로를 고정했다.
