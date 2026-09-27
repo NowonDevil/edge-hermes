@@ -25,6 +25,11 @@ has_tmux_session() {
   echo "===== $(date) boot watchdog requested ====="
   termux-wake-lock 2>/dev/null || true
 
+  # Pin CPU governor to performance (device is a dedicated always-plugged-in
+  # Hermes gateway server; interactive governor added noticeable latency
+  # spooling clocks up on each request).
+  su -c "for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > \"\$g\" 2>/dev/null; done" 2>/dev/null || true
+
   if ! mkdir "$LOCKDIR" 2>/dev/null; then
     LOCKPID=""
     [ -r "$LOCKDIR/pid" ] && LOCKPID="$(cat "$LOCKDIR/pid" 2>/dev/null || true)"

@@ -85,6 +85,31 @@ Termux 앱을 수동으로 열었을 때도 자동 복구되도록 `.bashrc`에 
 
 주의: `.termux/boot` 아래 executable 백업 파일은 Termux:Boot가 함께 실행할 수 있다. 이전 백업은 `disabled-backups/`로 옮기고 실행 권한을 제거한다.
 
+## CPU 거버너 고정 (performance)
+
+이 폰은 상시 전원 연결된 전용 Hermes 게이트웨이 서버로 운용된다(배터리
+세이버로 80%->70% 재충전 사이클만 유지). 기본 `interactive` 거버너는 요청마다
+클럭이 다시 올라가는 지연이 있어, 6개 코어 전부를 `performance`로 고정한다.
+
+Magisk root(`su`)로 즉시 적용:
+
+```bash
+su -c 'for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > "$g"; done'
+cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor   # 전부 performance 확인
+```
+
+재부팅 후에도 유지되도록 `scripts/04-hermes.sh`(watchdog)의
+`termux-wake-lock` 직후에 위 su 루프를 넣어뒀다. 재부팅 시 자동 재적용되며,
+`/sdcard/hermes-boot-schedule.log`에서 별도 로그는 남기지 않으니 필요하면
+아래로 수동 재확인한다.
+
+```bash
+su -c 'cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor'
+```
+
+주의: 배터리로만 운용하는 기기라면 발열/소모 증가 트레이드오프가 있으니
+`interactive`로 되돌리는 편이 나을 수 있다.
+
 ## 배터리 최적화 제외
 
 아래 앱을 배터리 최적화에서 제외한다.
