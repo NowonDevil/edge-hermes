@@ -4,16 +4,8 @@
 
 ## 현재 상태 요약
 
-- 기록 시각: 2026-09-21T09:28:32+09:00
-- 장비 모델: SM-G935K
-- Android: 8.0.0 / SDK 26
-- Linux/proot: Linux localhost 6.17.0-PRoot-Distro #1 SMP PREEMPT_DYNAMIC Fri, 10 Oct 2025 00:00:00 +0000 aarch64 GNU/Linux
-- Python: Python 3.13.5
-- Hermes: Hermes Agent v0.21.3 계열
-Install directory: /root/hermes-agent
-Python: 3.13.5
-OpenAI SDK: 2.24.0
-Run 'hermes version' for update status.
+- 2026-11-19 운영 기준: 갤럭시 S7 · Termux + proot Debian · `discordlite` · **Hermes v0.22.2 고정(업데이트 보류)**.
+- [Termux에서 상태 확인·시작하기 / Debian에서 Discord 응답 점검하기](docs/current-edge-hermes-status.md)
 - 저장소 목적: 스마트폰 루팅부터 최소 앱 구성, Termux/Tailscale/Termux:Boot, 배터리 설정, Hermes Agent 설치와 자동 시작까지 재현 가능한 절차 보관
 
 ## 핵심 구조
@@ -50,15 +42,7 @@ Android rooted phone
 
 Termux 홈에서 실행하는 스크립트는 저장소 `scripts/`에 원본을 보관한다. 실제 폰에서는 `/data/data/com.termux/files/home/` 아래에 두고 실행한다.
 
-```bash
-# 업데이트: Termux에서 실행, 내부적으로 Debian/proot에 진입
-~/hermes_update.sh
-
-# 게이트웨이 재시작: Termux에서 실행
-~/start-hermes-gateway.sh
-```
-
-업데이트 스크립트는 gateway/tmux를 먼저 종료하고, Debian/proot 안에서 `HOME=/root`, `HERMES_HOME=/root/.hermes`, `/root/hermes-agent/venv/bin/python -m hermes_cli.main --profile discordlite`를 고정한 뒤 `update -> doctor -> gateway restart` 순서로 처리한다.
+평소에는 Termux에서 `tmux ls`로 확인하고, 꺼져 있을 때만 `~/start-hermes-gateway.sh`로 시작한다. `hermes_update.sh`는 복구·유지보수용이며 업데이트 보류 중에는 실행하지 않는다.
 
 ## 빠른 검증
 
